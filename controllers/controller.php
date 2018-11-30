@@ -96,13 +96,13 @@ function get_receiver_id($id_emetteur) {
 
 
 /**
- * Moves uploaded file to our aquila_upload folder
+ * Moves uploaded file to our upload folder
  */
 function move_file($path) {
-    $pathto = 'aquila_upload/'.$path;
-    move_uploaded_file( $_FILES['new_file']['tmp_name'], $pathto) or 
+    $pathto = 'upload/'.$path;
+    move_uploaded_file( $_FILES['new_file']['tmp_name'], $pathto) or
     die( "Le format du fichier n\'est pas compatibe !");
-    
+
     return $pathto;
 }
 
@@ -164,8 +164,11 @@ function get_file_downloaded_url($id_emetteur) {
 function auto_delete() {
     $request = get_expired_file();
     while($result = $request->fetch()) {
+        delete_file_db($result['id_fichier']);
         $file = $result['file_url'];
-        unlink($file);
+        if(file_exists($file)) {
+            unlink($file);
+        }
     }
 }
 
@@ -174,31 +177,35 @@ function auto_delete() {
 
 /**
  * generate random value
- * @return random with 20 characters
+ * @return random with 10 characters
  */
 function random_value() {
     $rand = '';
     for($i = 0 ; $i < 9 ; $i++) {
         $rand .= mt_rand(0, 9);
     }
-    
+
     return intval($rand);
 }
+
+
 
 /**
  * compress file uploaded in zip file
  */
-function compress() {
-    $nameFile = $_FILES['file']['name'];
+function compress($nameFile) {
+    // $nameFile = $_FILES['file']['name'];
     $pathinfo = pathinfo($nameFile);
     $file = $pathinfo['filename'];
     $tmpName = $_FILES['file']['tmp_name'];
-    $download_folder = 'aquila_upload/';
+    $download_folder = 'upload/';
     $filepath = "upload_tmp/" . $_FILES["file"]["name"];
+
     if(move_uploaded_file($tmpName, $filepath)) {
         $zip = new ZipArchive();
-        $fileconpress = $download_folder.$file.".zip";
-        $compress = $zip->open($fileconpress, ZIPARCHIVE::CREATE);
+        $filecompress = $download_folder.$file.".zip";
+
+        $compress = $zip->open($filecompress, ZIPARCHIVE::CREATE);
 
         if ($compress === true) {
             $zip->addFile($filepath);
@@ -209,6 +216,7 @@ function compress() {
         }
     }
     unlink($filepath);
+
     $zip_file_url = $download_folder . $file;
     return $zip_file_url;
 }

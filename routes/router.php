@@ -24,15 +24,15 @@ if($link == 'aquila') {
 
 
 if($link == 'accueil' || $link == '/') {
-    
+
     echo $twig->render('accueil.twig');
 
     //when submit button is clicked
     if(isset($_POST['submitBtn'])) {
-        if(isset($_POST['name']) && isset($_POST['transmitter_email']) && isset($_POST['receiver_email']) && isset($_POST['message'])) {
+        if(isset($_POST['name']) && isset($_POST['transmitter_email']) && isset($_POST['receiver_email']) && isset($_POST['message']) && $_FILES['file']['name']) {
             $random_value = random_value();
-            // $path = $_FILES['new_file']['name'];
-            $file_url = compress();
+            $path = $_FILES['file']['name'];
+            $file_url = compress($path);
 
             //insert new transmitter (emetteur)
             new_emetteur($_POST['name'], $_POST['transmitter_email'], $_POST['message'], $random_value);
@@ -43,7 +43,7 @@ if($link == 'accueil' || $link == '/') {
             $id_emetteur = get_emetteur_id($_POST['name'], $_POST['transmitter_email'], $_POST['message'], $random_value);
 
             //insert the file
-            new_file($file_url, $id_emetteur);
+            new_file($file_url . '.zip', $id_emetteur);
 
             //insert receiver
             new_receiver($_POST['receiver_email'], $id_emetteur);
@@ -63,7 +63,7 @@ if($link == 'accueil' || $link == '/') {
                     </head>
                     <body>
                         <div class="text-center">
-                            <img src="http://papam.promo-21.codeur.online/aquila/public/images/logo.png" alt="">
+                            <img src="http://papam.promo-21.codeur.online/aquila/public/images/logo.png" alt="" width="150">
                             <h3>Aquila</h3>
                             <small>transfert de fichier</small>
                             <h2>Fichiers envoyés à</h2>
@@ -78,7 +78,7 @@ if($link == 'accueil' || $link == '/') {
 
             send_mail($_POST['transmitter_email'], $message_for_transmitter);
 
-            $base_url_sent = str_replace('aquila_upload/','',$file_url);
+            $base_url_sent = str_replace('upload/','',$file_url);
             $url_sent = base64_encode($base_url_sent);
 
             $message_for_receiver = '
@@ -88,7 +88,7 @@ if($link == 'accueil' || $link == '/') {
                     </head>
                     <body>
                         <div class="text-center">
-                            <img src="http://papam.promo-21.codeur.online/aquila/public/images/logo.png" alt="" width="150">
+                            <img src="http://papam.promo-21.codeur.online/aquila/public/images/logo.png" alt="" width="510">
                             <h3>Aquila</h3>
                             <small>transfert de fichier</small>
                             <h2>' . $_POST['name'] . '</h2>
@@ -106,22 +106,24 @@ if($link == 'accueil' || $link == '/') {
             send_mail($_POST['receiver_email'], $message_for_receiver);
 
 
+            // echo $twig->render('accueil.twig');
+            // echo $_FILES['new_file']['name'];
+
         }
         else {
-            echo "Veuillez remplir touts les champs !!!";
+            // echo $twig->render('accueil.twig', ['error' => 'Veuillez remplir tous les champs !!!']);
+            echo "<script>alert('Veuillez remplir tous les champs !!!');</script>";
         }
     }
-   
+
 }
 
 else if(preg_match('#telecharger#i', $link)) {
 
-
-
     if(isset($_POST['downloadBtn'])) {
 
         if(isset($_GET['fichier'])) {
-            $file = 'aquila_upload/' . base64_decode($_GET['fichier']);
+            $file = 'upload/' . base64_decode($_GET['fichier']) . '.zip';
             if (file_exists($file)) {
                 header('Content-Description: File Transfer');
                 header('Content-Type: application/octet-stream');
@@ -131,20 +133,39 @@ else if(preg_match('#telecharger#i', $link)) {
                 header('Pragma: public');
                 header('Content-Length: ' . filesize($file));
                 readfile($file);
+
+
+                $download_feed_back = '
+                <html>
+                    <head>
+                    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+                    </head>
+                    <body>
+                        <div class="text-center">
+                            <img src="http://papam.promo-21.codeur.online/aquila/public/images/logo.png" alt="" width="150">
+                            <h3>Aquila</h3>
+                            <small>transfert de fichier</small>
+                            <h2>' . $_POST['name'] . '</h2>
+                            <h4> Votre fichier vient d\'être téléchargé.</h4>
+                            <p>Merci d\'avoir utilisé Aquila !!!</p>
+                        </div>
+                    </body>
+                </html>
+                ';
+
+                send_mail($_POST['transmitter_email'], $download_feed_back);
+
+
                 exit;
-                
+
             }
             else {
-                echo 'Ce fichier n\'existe pas ou a été supprimé';
+                echo $twig->render('accueil.twig', ['error' => 'Le fichier que vous essayez de télécharger n\'existe pas ou a été supprimé. !!!']);
+                // echo "<script>alert('Le fichier que vous essayez de télécharger n\'existe pas ou a été supprimé. !!!');</script>";
             }
         }
     }
     echo $twig->render('download.twig');
-}
-
-else if($link == 'test') {
-    echo base64_encode  ('baye.jpg') . '<br>';
-    echo base64_decode(base64_encode  ('baye.jpg'));
 }
 
 else {
