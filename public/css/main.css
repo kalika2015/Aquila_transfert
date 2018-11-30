@@ -155,7 +155,7 @@ circle-quill {
     position: absolute;
     z-index: -5;
     margin-top: -35px;
-    margin-left: 19px;
+    margin-left: 36px;
 }
 .loader, .loader2 {
     width: 291px;
@@ -163,9 +163,12 @@ circle-quill {
     position: absolute;
     z-index: -5;
     margin-top: -35px;
-    margin-left: 19px;
+    margin-left: 36px;
 }
-
+input[type="file"]{
+    background-image: url("../images/uploadfile.png");
+    background-size: cover;
+}
 
 
 

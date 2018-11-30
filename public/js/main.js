@@ -58,11 +58,11 @@ $(document).ready(function(){
             });
             // Send file starts
             self.on("sending", function (file) {
-                console.log('upload started', file);
+                console.log('aquila_upload started', file);
                 $('.meter').show();
             });
 
-            // File upload Progress
+            // File aquila_upload Progress
             self.on("totaluploadprogress", function (progress) {
                 console.log("progress ", progress);
                 $('.roller').width(progress + '%');

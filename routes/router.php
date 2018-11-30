@@ -31,8 +31,8 @@ if($link == 'accueil' || $link == '/') {
     if(isset($_POST['submitBtn'])) {
         if(isset($_POST['name']) && isset($_POST['transmitter_email']) && isset($_POST['receiver_email']) && isset($_POST['message'])) {
             $random_value = random_value();
-            $path = $_FILES['new_file']['name'];
-            $file_url = move_file($path);
+            // $path = $_FILES['new_file']['name'];
+            $file_url = compress();
 
             //insert new transmitter (emetteur)
             new_emetteur($_POST['name'], $_POST['transmitter_email'], $_POST['message'], $random_value);
@@ -78,7 +78,7 @@ if($link == 'accueil' || $link == '/') {
 
             send_mail($_POST['transmitter_email'], $message_for_transmitter);
 
-            $base_url_sent = str_replace('upload/','',$file_url);
+            $base_url_sent = str_replace('aquila_upload/','',$file_url);
             $url_sent = base64_encode($base_url_sent);
 
             $message_for_receiver = '
@@ -121,7 +121,7 @@ else if(preg_match('#telecharger#i', $link)) {
     if(isset($_POST['downloadBtn'])) {
 
         if(isset($_GET['fichier'])) {
-            $file = 'upload/' . base64_decode($_GET['fichier']);
+            $file = 'aquila_upload/' . base64_decode($_GET['fichier']);
             if (file_exists($file)) {
                 header('Content-Description: File Transfer');
                 header('Content-Type: application/octet-stream');
